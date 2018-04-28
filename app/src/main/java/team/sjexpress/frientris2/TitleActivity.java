@@ -28,14 +28,11 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static java.security.AccessController.getContext;
-
 public class TitleActivity extends AppCompatActivity {
   public static final int REQUEST_IMAGE_CAPTURE = 532;
 
   private String imageFilePath;
   private Uri photoUri;
-
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +42,7 @@ public class TitleActivity extends AppCompatActivity {
     Button buttonStart = (Button)findViewById(R.id.button_start);
     Button buttonSettings = (Button)findViewById(R.id.button_settings);
     Button buttonManual = (Button)findViewById(R.id.button_manual);
+    Button buttonGallery = (Button)findViewById(R.id.button_gallery);
 
     buttonStart.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -57,7 +55,6 @@ public class TitleActivity extends AppCompatActivity {
       @Override
       public void onClick(View v) {
         Toast.makeText(getApplicationContext(), "Setting", Toast.LENGTH_SHORT).show();
-
         // 액티비티 전환 코드
         Intent intent = new Intent(getApplicationContext(), Setting.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -69,9 +66,19 @@ public class TitleActivity extends AppCompatActivity {
       @Override
       public void onClick(View v) {
         Toast.makeText(getApplicationContext(), "Manual", Toast.LENGTH_SHORT).show();
-
         // 액티비티 전환 코드
         Intent intent = new Intent(getApplicationContext(), ManualActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
+      }
+    });
+
+    buttonGallery.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Toast.makeText(getApplicationContext(), "Gallery", Toast.LENGTH_SHORT).show();
+        // 액티비티 전환 코드
+        Intent intent = new Intent(getApplicationContext(), GalleryActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
       }
@@ -105,15 +112,14 @@ public class TitleActivity extends AppCompatActivity {
 
       Toast.makeText(getApplicationContext(), "Processing...", Toast.LENGTH_LONG).show();
 
-      SparseArray<Face> mFaces;
+      SparseArray<Face> mFaces = null;
       Bitmap mBitmap = rotate(bitmap, exifDegree);
       Bitmap rBitmap = mBitmap;
-
       FaceDetector detector = new FaceDetector.Builder(getApplicationContext())
-          .setTrackingEnabled(true)
-          .setLandmarkType(FaceDetector.ALL_LANDMARKS)
-          .setMode(FaceDetector.ACCURATE_MODE)
-          .build();
+                .setTrackingEnabled(true)
+                .setLandmarkType(FaceDetector.ALL_LANDMARKS)
+                .setMode(FaceDetector.ACCURATE_MODE)
+                .build();
 
       if (!detector.isOperational()) {
       } else {
@@ -130,33 +136,21 @@ public class TitleActivity extends AppCompatActivity {
             x += (w - h) / 2;
             w = h;
           } else if(h > w) {
-            y += (h - w) / 2;
-            h = w;
+              y += (h - w) / 2;
+              h = w;
           }
-
-          rBitmap = Bitmap.createBitmap(mBitmap, x, y, w, h);
+            rBitmap = Bitmap.createBitmap(mBitmap, x, y, w, h);
+        }
+        else {
+          Toast.makeText(getApplicationContext(), "Cannot find any face; RETRY!!", Toast.LENGTH_LONG).show();
+          return;
         }
       }
 
-      if(mBitmap == rBitmap) {
-        int x = 0;
-        int y = 0;
-        int w = mBitmap.getWidth();
-        int h = mBitmap.getHeight();
-
-        if(w > h) {
-          x += (w - h) / 2;
-          w = h;
-        } else if(h > w) {
-          y += (h - w) / 2;
-          h = w;
-        }
-        rBitmap = Bitmap.createBitmap(mBitmap, x, y, w, h);
-      }
-
+      String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
       ContextWrapper cw = new ContextWrapper(getApplicationContext());
       File dir = cw.getDir("imageDir", Context.MODE_PRIVATE);
-      File path = new File(dir, "face.png");
+      File path = new File(dir, timeStamp + "_face.png");
       FileOutputStream fos = null;
       try {
         fos = new FileOutputStream(path);
@@ -173,7 +167,7 @@ public class TitleActivity extends AppCompatActivity {
 
       Intent intent = new Intent(TitleActivity.this, GameActivity.class);
       intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-      intent.putExtra("face", "face.png");
+      intent.putExtra("face", timeStamp + "_face.png");
       startActivity(intent);
     }
   }
@@ -216,7 +210,7 @@ public class TitleActivity extends AppCompatActivity {
 
   private File createImageFile() throws IOException {
     String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-    String imageFileName = "TEST_" + timeStamp + "_";
+    String imageFileName = timeStamp + "_";
     File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
     File image = File.createTempFile(
         imageFileName,      /* prefix */
