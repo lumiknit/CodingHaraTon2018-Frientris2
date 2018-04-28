@@ -106,12 +106,37 @@ public class TitleActivity extends AppCompatActivity {
         mFaces = detector.detect(frame);
         detector.release();
         if(mFaces.size() > 0) {
-          rBitmap = Bitmap.createBitmap(mBitmap,
-              (int) mFaces.valueAt(0).getPosition().x,
-              (int) mFaces.valueAt(0).getPosition().y,
-              (int) mFaces.valueAt(0).getWidth(),
-              (int) mFaces.valueAt(0).getHeight());
+          int x = (int) mFaces.valueAt(0).getPosition().x;
+          int y = (int) mFaces.valueAt(0).getPosition().y;
+          int w = (int) mFaces.valueAt(0).getWidth();
+          int h = (int) mFaces.valueAt(0).getHeight();
+
+          if(w > h) {
+            x += (w - h) / 2;
+            w = h;
+          } else if(h > w) {
+            y += (h - w) / 2;
+            h = w;
+          }
+
+          rBitmap = Bitmap.createBitmap(mBitmap, x, y, w, h);
         }
+      }
+
+      if(mBitmap == rBitmap) {
+        int x = 0;
+        int y = 0;
+        int w = mBitmap.getWidth();
+        int h = mBitmap.getHeight();
+
+        if(w > h) {
+          x += (w - h) / 2;
+          w = h;
+        } else if(h > w) {
+          y += (h - w) / 2;
+          h = w;
+        }
+        rBitmap = Bitmap.createBitmap(mBitmap, x, y, w, h);
       }
 
       ContextWrapper cw = new ContextWrapper(getApplicationContext());

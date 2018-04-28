@@ -31,14 +31,18 @@ public class Image {
     options.inScaled = false;
 
     Bitmap img = BitmapFactory.decodeResource(context.getResources(), resID, options);
-    initialize(gl, img);
+    initialize(gl, img, 0);
   }
 
   public Image(GL10 gl, Bitmap img) {
-    initialize(gl, img);
+    initialize(gl, img, 0);
   }
 
-  public void initialize(GL10 gl, Bitmap img) {
+  public Image(GL10 gl, Bitmap img, int option) {
+    initialize(gl, img, option);
+  }
+
+  public void initialize(GL10 gl, Bitmap img, int option) {
     int[] id = new int[1];
     id[0] = 0;
 
@@ -56,14 +60,27 @@ public class Image {
     imageBuffer.order(ByteOrder.nativeOrder());
     byte[] buf = new byte[4];
 
-    for (int i=0;i<height;i++) {
-      for(int j=0;j<width;j++) {
-        int argb = img.getPixel(j, i);
-        buf[0] = (byte)((argb & (0x00ff0000)) >> 16);
-        buf[1] = (byte)((argb & (0x0000ff00)) >> 8);
-        buf[2] = (byte)((argb & (0x000000ff)) >> 0);
-        buf[3] = (byte)((argb & (0xff000000)) >> 24);
-        imageBuffer.put(buf);
+    if(option == 0) {
+      for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+          int argb = img.getPixel(j, i);
+          buf[0] = (byte) ((argb & (0x00ff0000)) >> 16);
+          buf[1] = (byte) ((argb & (0x0000ff00)) >> 8);
+          buf[2] = (byte) ((argb & (0x000000ff)) >> 0);
+          buf[3] = (byte) ((argb & (0xff000000)) >> 24);
+          imageBuffer.put(buf);
+        }
+      }
+    } else {
+      for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+          int argb = img.getPixel(j, i);
+          buf[0] = (byte) ((argb & (0x00ff0000)) >> 16);
+          buf[1] = (byte) ((argb & (0x0000ff00)) >> 8);
+          buf[2] = (byte) ((argb & (0x000000ff)) >> 0);
+          buf[3] = (byte) (((argb & (0xff000000)) >> 24));
+          imageBuffer.put(buf);
+        }
       }
     }
 
