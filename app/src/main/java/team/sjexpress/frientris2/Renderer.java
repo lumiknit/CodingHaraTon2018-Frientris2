@@ -102,11 +102,15 @@ public class Renderer implements GLSurfaceView.Renderer {
       gl.glPushMatrix();
       for(int j=0;j<game.WIDTH;j++) {
         gl.glTranslatef(2.f, 0.f, 0.f);
-        if(game.board[i][j] > 0) {
+        if(game.board[i][j] != 0) {
           gl.glPushMatrix();
           gl.glTranslatef(1.f, 1.f, 0.f);
           gl.glScalef(0.95f, 0.95f, 1.0f);
           gl.glTranslatef(-1.f, -1.f, 0.f);
+          if(game.board[i][j] > 0)
+            gl.glRotatef((game.board[i][j] - 1) * 90.f, 0.f, 0.f, -1.f);
+          else
+            gl.glRotatef(game.rAngle * 90.f, 0.f, 0.f, -1.f);
           gl.glColor4f(0.f, 0.f, 0.f, 1.f);
           RenderUtil.drawSquare(gl);
           gl.glScalef(0.95f, 0.95f, 1.0f);

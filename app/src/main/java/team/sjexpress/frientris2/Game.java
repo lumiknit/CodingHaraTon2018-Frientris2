@@ -86,7 +86,7 @@ public class Game {
   /* Current Block */
   public int type;
   public int x, y;
-  public int angle;
+  public int angle, rAngle;
 
   public Random typeRandom;
 
@@ -242,6 +242,7 @@ public class Game {
     x = 0;
     y = 0;
     angle = 0;
+    rAngle = 0;
     genBlock();
     particles = new ArrayList<>();
   }
@@ -308,7 +309,6 @@ public class Game {
     int t = 4, xo = 0, yo = 0;
     if(type == T_O) {
       t = 1;
-
     } else if(type < T_T) {
       t = 2;
       if(angle == 0) { xo = -1; yo = 0; }
@@ -325,14 +325,17 @@ public class Game {
       x = x + xo;
       y = y + yo;
       angle = (angle + 1) % t;
+      rAngle = (rAngle + 1) % 4;
     } else if(!isCollided(type, x + xo - 1, y + yo, (angle + 1) % t)) {
       x = x + xo - 1;
       y = y + yo;
       angle = (angle + 1) % t;
+      rAngle = (rAngle + 1) % 4;
     } else if(!isCollided(type, x + xo + 1, y + yo, (angle + 1) % t)) {
       x = x + xo + 1;
       y = y + yo;
       angle = (angle + 1) % t;
+      rAngle = (rAngle + 1) % 4;
     }
     updateBoard();
   }
@@ -356,7 +359,7 @@ public class Game {
       for(int j=0;j<4;j++) {
         if(b[i * 4 + j] == 1) {
           if(y + i >= 0 &&
-              (!inBoard(x + j, y + i) || board[y + i][x + j] == 1))
+              (!inBoard(x + j, y + i) || board[y + i][x + j] > 0))
             return true;
           else if(x + j < 0 || x + j >= WIDTH) return true;
         }
@@ -367,27 +370,31 @@ public class Game {
 
   /* Fix Current Block */
   private void fixBlock() {
+    boolean go = false;
     delLines = new ArrayList<>();
     int[] b = getBlockVector(type, angle);
     for(int i=0;i<4;i++) {
       for(int j=0;j<4;j++) {
-        if(b[i * 4 + j] == 1) {
+        if(b[i * 4 + j] > 0) {
           if(y + i >= 0) {
-            board[y + i][x + j] = 1;
+            board[y + i][x + j] = 1 + rAngle;
           } else {
-            gameOver();
+            go = true;
           }
         }
       }
     }
-    for(int i=0;i<HEIGHT;i++) {
-      boolean f = true;
-      for(int j=0;j<WIDTH;j++) {
-        if(board[i][j] == 0) f = false;
-      }
-      if(f) {
-        delLines.add(i);
-        delLineFlag = DELL_F_MAX;
+    if(go) gameOver();
+    else {
+      for (int i = 0; i < HEIGHT; i++) {
+        boolean f = true;
+        for (int j = 0; j < WIDTH; j++) {
+          if (board[i][j] == 0) f = false;
+        }
+        if (f) {
+          delLines.add(i);
+          delLineFlag = DELL_F_MAX;
+        }
       }
     }
   }
@@ -399,14 +406,14 @@ public class Game {
   private void updateBoard() {
     for(int i=0;i<HEIGHT;i++) {
       for(int j=0;j<WIDTH;j++) {
-        if(board[i][j] == 2) board[i][j] = 0;
+        if(board[i][j] < 0) board[i][j] = 0;
       }
     }
     int[] b = getBlockVector(type, angle);
     for(int i=0;i<4;i++) {
       for(int j=0;j<4;j++) {
         if(inBoard(x + j, y + i) && b[i * 4 + j] == 1) {
-          board[y + i][x + j] = 2;
+          board[y + i][x + j] = -1;
         }
       }
     }
@@ -419,22 +426,24 @@ public class Game {
         off++;
         for(int k=0;k<3 * WIDTH;k++) {
           for(int l=0;l<3;l++) {
-            particles.add(new Particle(
-                -1.f + k / 3.f / WIDTH * 2,
-                1.f - (i + l / 2.f) / HEIGHT * 2,
-                0.3f + 0.7f * random.nextFloat(),
-                // 0.9f, 0.02f, 0.0f,
-                1.f - random.nextFloat() * 0.1f,
-                1.f - random.nextFloat() * 0.4f,
-                1.f - random.nextFloat() * 0.5f,
-                (k % 3) * 3 + l));
-            particles.add(new Particle(
-                -1.f + k / 3.f / WIDTH * 2,
-                1.f - (i + l / 2.f) / HEIGHT * 2,
-                0.3f + 0.7f * random.nextFloat(),
-                // 0.9f, 0.02f, 0.0f,
-                0.9f - random.nextFloat() * 0.2f, 0.3f * random.nextFloat(), 0.2f * random.nextFloat(),
-                -1));
+            if(activity.optPart)
+              particles.add(new Particle(
+                  -1.f + k / 3.f / WIDTH * 2,
+                  1.f - (i + l / 2.f) / HEIGHT * 2,
+                  0.3f + 0.7f * random.nextFloat(),
+                  // 0.9f, 0.02f, 0.0f,
+                  1.f - random.nextFloat() * 0.1f,
+                  1.f - random.nextFloat() * 0.4f,
+                  1.f - random.nextFloat() * 0.5f,
+                  (k % 3) * 3 + l));
+            if(activity.optGore)
+              particles.add(new Particle(
+                  -1.f + k / 3.f / WIDTH * 2,
+                  1.f - (i + l / 2.f) / HEIGHT * 2,
+                  0.3f + 0.7f * random.nextFloat(),
+                  // 0.9f, 0.02f, 0.0f,
+                  0.9f - random.nextFloat() * 0.2f, 0.3f * random.nextFloat(), 0.2f * random.nextFloat(),
+                  -1));
           }
         }
       } else board[i + off] = board[i];
@@ -456,7 +465,7 @@ public class Game {
             for(int l=0;l<3;l++) {
               if(activity.optPart)
                 particles.add(new Particle(
-                    -1.f + (j + k) / 3.f / WIDTH * 2,
+                    -1.f + (j + k / 3.f) / WIDTH * 2,
                     1.f - (i + l / 2.f) / HEIGHT * 2,
                     0.3f + 0.7f * random.nextFloat(),
                     // 0.9f, 0.02f, 0.0f,
@@ -466,7 +475,7 @@ public class Game {
                     k * 3 + l));
               if(activity.optGore)
                 particles.add(new Particle(
-                    -1.f + (j + k) / 3.f / WIDTH * 2,
+                    -1.f + (j + k / 3.f) / WIDTH * 2,
                     1.f - (i + l / 2.f) / HEIGHT * 2,
                     0.3f + 0.7f * random.nextFloat(),
                     // 0.9f, 0.02f, 0.0f,
