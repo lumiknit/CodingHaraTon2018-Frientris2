@@ -132,7 +132,7 @@ public class Game {
           if (delLineFlag < 0) {
             xaShake += 0.18f;
             yaShake += 0.18f;
-            activity.vibrator.vibrate(250 + 50 * delLines.size());
+            if(activity.optVib) activity.vibrator.vibrate(250 + 50 * delLines.size());
             deleteLines();
           }
         } else {
@@ -149,11 +149,11 @@ public class Game {
         if(firstDown >= 0 || (secondDown >= 0 && tick - secondDown > 4)) {
           if(touchType == 1) {
             moveLeft();
-            activity.vibrator.vibrate(20);
+            if(activity.optVib) activity.vibrator.vibrate(20);
             xShake = -0.05f;
           } else if(touchType == 2) {
             moveRight();
-            activity.vibrator.vibrate(20);
+            if(activity.optVib) activity.vibrator.vibrate(20);
             xShake = 0.05f;
           }
           if(firstDown >= 0) {
@@ -454,22 +454,24 @@ public class Game {
         if(board[i][j] != 0) {
           for(int k=0;k<3;k++) {
             for(int l=0;l<3;l++) {
-              particles.add(new Particle(
-                  -1.f + (j + k) / 3.f / WIDTH * 2,
-                  1.f - (i + l / 2.f) / HEIGHT * 2,
-                  0.3f + 0.7f * random.nextFloat(),
-                  // 0.9f, 0.02f, 0.0f,
-                  1.f - random.nextFloat() * 0.1f,
-                  1.f - random.nextFloat() * 0.4f,
-                  1.f - random.nextFloat() * 0.5f,
-                  k * 3 + l));
-              particles.add(new Particle(
-                  -1.f + (j + k) / 3.f / WIDTH * 2,
-                  1.f - (i + l / 2.f) / HEIGHT * 2,
-                  0.3f + 0.7f * random.nextFloat(),
-                  // 0.9f, 0.02f, 0.0f,
-                  0.9f - random.nextFloat() * 0.2f, 0.3f * random.nextFloat(), 0.2f * random.nextFloat(),
-                  -1));
+              if(activity.optPart)
+                particles.add(new Particle(
+                    -1.f + (j + k) / 3.f / WIDTH * 2,
+                    1.f - (i + l / 2.f) / HEIGHT * 2,
+                    0.3f + 0.7f * random.nextFloat(),
+                    // 0.9f, 0.02f, 0.0f,
+                    1.f - random.nextFloat() * 0.1f,
+                    1.f - random.nextFloat() * 0.4f,
+                    1.f - random.nextFloat() * 0.5f,
+                    k * 3 + l));
+              if(activity.optGore)
+                particles.add(new Particle(
+                    -1.f + (j + k) / 3.f / WIDTH * 2,
+                    1.f - (i + l / 2.f) / HEIGHT * 2,
+                    0.3f + 0.7f * random.nextFloat(),
+                    // 0.9f, 0.02f, 0.0f,
+                    0.9f - random.nextFloat() * 0.2f, 0.3f * random.nextFloat(), 0.2f * random.nextFloat(),
+                    -1));
             }
           }
           board[i][j] = 0;

@@ -72,7 +72,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     gl.glPushMatrix();
     gl.glColor4f(0.0f, 0.0f, 0.0f, 1.f);
-    if(game.gameOverFlag >= 0) {
+    if(game.activity.optHos && game.gameOverFlag >= 0) {
       gl.glRotatef(d / 300.f, 0.f, 0.f, 1.f);
       gl.glScalef(accF(d), accF(d), 1.f);
     }
@@ -80,7 +80,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     gl.glPopMatrix();
 
     gl.glPushMatrix();
-    if(game.gameOverFlag >= 0) {
+    if(game.activity.optHos && game.gameOverFlag >= 0) {
       gl.glRotatef(d / 400.f, 0.f, 0.f, -1.f);
       gl.glScalef(accF(d), accF(d), 1.f);
     }
@@ -90,7 +90,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     gl.glPopMatrix();
 
     gl.glPushMatrix();
-    if(game.gameOverFlag >= 0) {
+    if(game.activity.optHos && game.gameOverFlag >= 0) {
       gl.glRotatef(d / 200.f, 0.f, 0.f, -1.f);
       gl.glScalef(accF(d), accF(d), 1.f);
     }
@@ -128,7 +128,7 @@ public class Renderer implements GLSurfaceView.Renderer {
 
     gl.glPushMatrix();
     gl.glScalef(0.92f, 0.96f, 1.0f);
-    if(game.gameOverFlag >= 0) {
+    if(game.activity.optHos && game.gameOverFlag >= 0) {
       gl.glRotatef(d / 300.f, 0.f, 0.f, -1.f);
       gl.glScalef(accF(d), accF(d), 1.f);
     }

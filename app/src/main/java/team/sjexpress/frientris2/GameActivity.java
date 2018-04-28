@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ConfigurationInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -26,11 +27,23 @@ public class GameActivity extends AppCompatActivity {
 
   public Vibrator vibrator;
 
+  public boolean optGore;
+  public boolean optPart;
+  public boolean optHos;
+  public boolean optVib;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
     vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+
+    SharedPreferences pref = getSharedPreferences("setting", MODE_PRIVATE);
+    optGore = pref.getBoolean("gore", true);
+    optPart = pref.getBoolean("particle", true);
+    optHos = pref.getBoolean("hos", true);
+    optVib = pref.getBoolean("vibration", true);
+
 
     Intent intent = getIntent();
     String fileName = intent.getStringExtra("face");
