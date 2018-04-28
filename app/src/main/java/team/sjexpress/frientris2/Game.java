@@ -1,5 +1,6 @@
 package team.sjexpress.frientris2;
 
+import android.os.VibrationEffect;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.Toast;
@@ -52,6 +53,8 @@ public class Game {
           0, 1, 1, 0,
           0, 0, 0, 0},
   };
+
+  public static final int DELL_F_MAX = 5;
 
   public Random random = new Random();
 
@@ -127,8 +130,9 @@ public class Game {
         if (delLineFlag >= 0) {
           delLineFlag--;
           if (delLineFlag < 0) {
-            xaShake = 0.2f;
-            yaShake = 0.2f;
+            xaShake += 0.18f;
+            yaShake += 0.18f;
+            activity.vibrator.vibrate(250 + 50 * delLines.size());
             deleteLines();
           }
         } else {
@@ -145,9 +149,11 @@ public class Game {
         if(firstDown >= 0 || (secondDown >= 0 && tick - secondDown > 4)) {
           if(touchType == 1) {
             moveLeft();
+            activity.vibrator.vibrate(20);
             xShake = -0.05f;
           } else if(touchType == 2) {
             moveRight();
+            activity.vibrator.vibrate(20);
             xShake = 0.05f;
           }
           if(firstDown >= 0) {
@@ -187,7 +193,6 @@ public class Game {
     if(action == MotionEvent.ACTION_DOWN) {
       int w = activity.getWindow().getDecorView().getWidth();
       int h = activity.getWindow().getDecorView().getHeight();
-      Log.d("Position", "" + x / w + "," + y / h);
       float xp = x / w;
       float yp = y / h;
       if(yp >= 0.8f) { /* Drop */
@@ -335,7 +340,6 @@ public class Game {
   /* Move Block Down (by Each Step) */
   private void stepBlock() {
     boolean b = isCollided(type, x, y + 1, angle);
-    Log.d("Game", "Coll " + b);
     if(!b) {
       y++;
       updateBoard();
@@ -383,7 +387,7 @@ public class Game {
       }
       if(f) {
         delLines.add(i);
-        delLineFlag = 5;
+        delLineFlag = DELL_F_MAX;
       }
     }
   }
@@ -415,10 +419,10 @@ public class Game {
         off++;
         for(int k=0;k<3 * WIDTH;k++) {
           for(int l=0;l<3;l++) {
-            Log.d("Game", "Particle " + (-1.f + k / 3.f / WIDTH * 2));
             particles.add(new Particle(
                 -1.f + k / 3.f / WIDTH * 2,
                 1.f - (i + l / 2.f) / HEIGHT * 2,
+                0.3f + 0.7f * random.nextFloat(),
                 // 0.9f, 0.02f, 0.0f,
                 1.f - random.nextFloat() * 0.1f,
                 1.f - random.nextFloat() * 0.4f,
@@ -427,6 +431,7 @@ public class Game {
             particles.add(new Particle(
                 -1.f + k / 3.f / WIDTH * 2,
                 1.f - (i + l / 2.f) / HEIGHT * 2,
+                0.3f + 0.7f * random.nextFloat(),
                 // 0.9f, 0.02f, 0.0f,
                 0.9f - random.nextFloat() * 0.2f, 0.3f * random.nextFloat(), 0.2f * random.nextFloat(),
                 -1));
@@ -444,5 +449,32 @@ public class Game {
 
   public void gameOver() {
     gameOverFlag = System.currentTimeMillis();
+    for(int i=0;i<HEIGHT;i++) {
+      for (int j = 0; j < WIDTH; j++) {
+        if(board[i][j] != 0) {
+          for(int k=0;k<3;k++) {
+            for(int l=0;l<3;l++) {
+              particles.add(new Particle(
+                  -1.f + (j + k) / 3.f / WIDTH * 2,
+                  1.f - (i + l / 2.f) / HEIGHT * 2,
+                  0.3f + 0.7f * random.nextFloat(),
+                  // 0.9f, 0.02f, 0.0f,
+                  1.f - random.nextFloat() * 0.1f,
+                  1.f - random.nextFloat() * 0.4f,
+                  1.f - random.nextFloat() * 0.5f,
+                  k * 3 + l));
+              particles.add(new Particle(
+                  -1.f + (j + k) / 3.f / WIDTH * 2,
+                  1.f - (i + l / 2.f) / HEIGHT * 2,
+                  0.3f + 0.7f * random.nextFloat(),
+                  // 0.9f, 0.02f, 0.0f,
+                  0.9f - random.nextFloat() * 0.2f, 0.3f * random.nextFloat(), 0.2f * random.nextFloat(),
+                  -1));
+            }
+          }
+          board[i][j] = 0;
+        }
+      }
+    }
   }
 }

@@ -8,6 +8,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,9 +24,13 @@ public class GameActivity extends AppCompatActivity {
 
   public Bitmap face;
 
+  public Vibrator vibrator;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+
+    vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
 
     Intent intent = getIntent();
     String fileName = intent.getStringExtra("face");

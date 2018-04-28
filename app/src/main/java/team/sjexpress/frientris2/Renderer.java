@@ -22,7 +22,7 @@ public class Renderer implements GLSurfaceView.Renderer {
   public void onSurfaceCreated(GL10 gl, EGLConfig config) {
     hos = new Image(gl, game.activity.getApplicationContext(), R.drawable.hos);
     sj = new Image(gl, game.activity.getApplicationContext(), R.drawable.sj);
-    face = new Image(gl, game.activity.face);
+    face = new Image(gl, game.activity.face, 1);
   }
 
   @Override
@@ -98,7 +98,6 @@ public class Renderer implements GLSurfaceView.Renderer {
     gl.glTranslatef(-1.f, -1.f, 0.f);
     gl.glScalef(1.0f / game.WIDTH, 1.0f / game.HEIGHT, 1.0f);
     gl.glTranslatef(-1.f, 1.f, 0.f);
-    gl.glColor4f(1.f, 1.f, 1.f, 1.f);
     for(int i=game.HEIGHT - 1;i >= 0;i--) {
       gl.glPushMatrix();
       for(int j=0;j<game.WIDTH;j++) {
@@ -108,6 +107,16 @@ public class Renderer implements GLSurfaceView.Renderer {
           gl.glTranslatef(1.f, 1.f, 0.f);
           gl.glScalef(0.95f, 0.95f, 1.0f);
           gl.glTranslatef(-1.f, -1.f, 0.f);
+          gl.glColor4f(0.f, 0.f, 0.f, 1.f);
+          RenderUtil.drawSquare(gl);
+          gl.glScalef(0.95f, 0.95f, 1.0f);
+          if(game.delLineFlag >= 0 && game.delLines.indexOf(i) >= 0) {
+            gl.glColor4f(1.f,
+                1.f * game.delLineFlag / game.DELL_F_MAX,
+                1.f * game.delLineFlag / game.DELL_F_MAX, 1.f);
+          } else {
+            gl.glColor4f(1.f, 1.f, 1.f, 1.f);
+          }
           face.draw(gl);
           gl.glPopMatrix();
         }
@@ -128,7 +137,8 @@ public class Renderer implements GLSurfaceView.Renderer {
       gl.glColor4f(p.r, p.g, p.b, p.a);
       gl.glPushMatrix();
       gl.glTranslatef(p.x, p.y, 0.f);
-      gl.glScalef(0.3f / game.WIDTH, 0.3f / game.HEIGHT, 1.f);
+      gl.glScalef(0.3f / game.WIDTH * p.size, 0.3f / game.HEIGHT * p.size, 1.f);
+      gl.glRotatef(p.angle, 0.f, 0.f, 1.f);
       if(p.index < 0)  RenderUtil.drawSquare(gl);
       else face.draw(gl, p.index);
       gl.glPopMatrix();
