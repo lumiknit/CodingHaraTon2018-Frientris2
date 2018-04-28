@@ -44,6 +44,7 @@ public class TitleActivity extends AppCompatActivity {
 
     Button buttonStart = (Button)findViewById(R.id.button_start);
     Button buttonSettings = (Button)findViewById(R.id.button_settings);
+    Button buttonManual = (Button)findViewById(R.id.button_manual);
 
     buttonStart.setOnClickListener(new View.OnClickListener() {
       @Override
@@ -55,12 +56,24 @@ public class TitleActivity extends AppCompatActivity {
     buttonSettings.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        Toast.makeText(getApplicationContext(), "액티비티 전환", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Setting", Toast.LENGTH_SHORT).show();
 
         // 액티비티 전환 코드
         Intent intent = new Intent(getApplicationContext(), Setting.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
+      }
+    });
 
+    buttonManual.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        Toast.makeText(getApplicationContext(), "Manual", Toast.LENGTH_SHORT).show();
+
+        // 액티비티 전환 코드
+        Intent intent = new Intent(getApplicationContext(), ManualActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        startActivity(intent);
       }
     });
   }
@@ -69,6 +82,8 @@ public class TitleActivity extends AppCompatActivity {
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+      Toast.makeText(getApplicationContext(), "Image...", Toast.LENGTH_SHORT).show();
+
       Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath);
       ExifInterface exif = null;
 
@@ -157,6 +172,7 @@ public class TitleActivity extends AppCompatActivity {
       }
 
       Intent intent = new Intent(TitleActivity.this, GameActivity.class);
+      intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
       intent.putExtra("face", "face.png");
       startActivity(intent);
     }

@@ -15,7 +15,7 @@
         android:textAlignment="center"
         android:textSize="50dp"
         android:textColor="#202020"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -31,5 +31,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Settings"/>
+    <Button
+        android:id="@+id/button_manual"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Manual"/>
 
 </LinearLayout>

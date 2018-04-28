@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Frientris2</string>
     <string name="back">Main Menu</string>
+    <string name="manual">
+        Take Picture and Break TTUK-BBAE-GI\n
+        Green Area: Single Touch = Soft Drop, Double Touch = Hard Drop\n
+        Red Area: Move Left/Right\n
+        Other Area: Rotate
+    </string>
 </resources>

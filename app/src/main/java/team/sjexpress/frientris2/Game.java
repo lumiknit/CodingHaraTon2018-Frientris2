@@ -7,14 +7,15 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.Semaphore;
 
 public class Game {
   /* Maybe This is Fxxxing Large Class */
   /* Don't try to read this */
 
   /* Constant */
-  public static final int WIDTH = 7;
-  public static final int HEIGHT = 14;
+  public int WIDTH;
+  public int HEIGHT;
   public static final int T_O = 0;
   public static final int T_I = 1;
   public static final int T_S = 2;
@@ -70,7 +71,7 @@ public class Game {
   public long delLineFlag = -1;
   public long gameOverFlag = -1;
 
-  public int touchType = 0;
+  public int touchType = -1;
   public int touchId = -1;
   public long firstDown = -1;
   public long secondDown = -1;
@@ -78,6 +79,7 @@ public class Game {
   public ArrayList<Integer> delLines;
 
   public ArrayList<Particle> particles;
+  public Semaphore semaParticle;
 
   /* Current State */
   public int[][] board;
@@ -93,6 +95,8 @@ public class Game {
 
   public Game(GameActivity activity) {
     this.activity = activity;
+    WIDTH = activity.optWidth;
+    HEIGHT = WIDTH * 2;
     typeRandom = new Random();
     initialize();
   }
@@ -124,14 +128,14 @@ public class Game {
       } else {
         xShake = xShake * 0.8f + xaShake * random.nextFloat() - xaShake * 0.5f;
         yShake = yShake * 0.8f + yaShake * random.nextFloat() - yaShake * 0.5f;
-        xaShake = xaShake * 0.8f;
-        yaShake = yaShake * 0.8f;
+        xaShake = xaShake * 0.85f;
+        yaShake = yaShake * 0.85f;
 
         if (delLineFlag >= 0) {
           delLineFlag--;
           if (delLineFlag < 0) {
-            xaShake += 0.18f;
-            yaShake += 0.18f;
+            xaShake += 0.1f + xaShake;
+            yaShake += 0.1f + xaShake;
             if(activity.optVib) activity.vibrator.vibrate(250 + 50 * delLines.size());
             deleteLines();
           }
@@ -165,13 +169,18 @@ public class Game {
         }
       }
 
-      for (int i = 0; i < particles.size(); i++) {
-        Particle p = particles.get(i);
-        p.step();
-        if (p.life >= fpsLimit * 2 / 3) {
-          particles.remove(i--);
+      try {
+        semaParticle.acquire();
+        for (int i = 0; i < particles.size(); i++) {
+          Particle p = particles.get(i);
+          p.step();
+          if (p.life >= fpsLimit * 2 / 3) {
+            particles.remove(i--);
+          }
         }
-      }
+        semaParticle.release();
+      } catch(Exception e) {}
+
 
       surfaceView.requestRender();
 
@@ -187,7 +196,8 @@ public class Game {
   }
 
   public boolean onTouchEvent(MotionEvent event) {
-    int action = event.getAction();
+    if(gameOverFlag >= 0) return false;
+    int action = event.getAction() & MotionEvent.ACTION_MASK;
     float x = event.getX();
     float y = event.getY();
     if(action == MotionEvent.ACTION_DOWN) {
@@ -195,32 +205,45 @@ public class Game {
       int h = activity.getWindow().getDecorView().getHeight();
       float xp = x / w;
       float yp = y / h;
+      Log.d("Game", "" + touchType);
       if(yp >= 0.8f) { /* Drop */
-        if(touchType == 0) {
+        if(touchType <= 0) {
           touchType = 3;
           firstDown = tick;
           touchId = event.getPointerId(0);
         }
-      } else if(yp < 0.4f) { /* Rotate */
-        rotate();
-      } else if(xp < 0.5f) { /* Left */
-        if(touchType == 0) {
+      } else if(xp < 0.35f) { /* Left */
+        if(touchType <= 0) {
           touchType = 1;
           firstDown = tick;
           touchId = event.getPointerId(0);
         }
-      } else { /* Right */
-        if(touchType == 0) {
+      } else if(xp > 0.65f) { /* Right */
+        if(touchType <= 0) {
           touchType = 2;
           firstDown = tick;
           touchId = event.getPointerId(0);
         }
+      } else {
+        rotate();
       }
     } else if(action == MotionEvent.ACTION_UP && touchId == event.getPointerId(0)) {
       touchType = 0;
       firstDown = -1;
       secondDown = -1;
       touchId = 0;
+    } else if(action == MotionEvent.ACTION_POINTER_DOWN) {
+      int w = activity.getWindow().getDecorView().getWidth();
+      int h = activity.getWindow().getDecorView().getHeight();
+      float xp = x / w;
+      float yp = y / h;
+      Log.d("Game", "PTDOWN " + yp);
+      if(yp >= 0.75f && touchType == 3) {
+        hardDrop();
+        touchType = 0;
+        firstDown = -1;
+        secondDown = -1;
+      }
     }
     return true;
   }
@@ -245,6 +268,7 @@ public class Game {
     rAngle = 0;
     genBlock();
     particles = new ArrayList<>();
+    semaParticle = new Semaphore(1);
   }
 
   public void finalize() {
@@ -264,8 +288,9 @@ public class Game {
   private void genBlock() {
     type = typeRandom.nextInt(7);
     x = WIDTH / 2 - 1;
-    y = -4;
+    y = -3;
     angle = 0;
+    rAngle = typeRandom.nextInt(4);
   }
 
   private int[] getBlockVector(int type, int angle) {
@@ -352,6 +377,22 @@ public class Game {
     }
   }
 
+  private void hardDrop() {
+    int i;
+    for(i=1;i<HEIGHT;i++) {
+      if(isCollided(type, x, y + i, angle)) break;
+    }
+    if(i < HEIGHT) {
+      y += i - 1;
+      yShake = -0.5f;
+      yaShake = 1.0f;
+      xaShake = 0.3f;
+      fixBlock();
+      genBlock();
+      updateBoard();
+    }
+  }
+
   /* Check Current Block is Collided with Fixed Blocks (by User Input) */
   private boolean isCollided(int type, int x, int y, int angle) {
     int[] b = getBlockVector(type, angle);
@@ -423,27 +464,28 @@ public class Game {
     int off = 0;
     for(int i=HEIGHT - 1;i>=0;i--) {
       if(delLines.indexOf(i) >= 0) {
+        score += WIDTH;
         off++;
         for(int k=0;k<3 * WIDTH;k++) {
           for(int l=0;l<3;l++) {
-            if(activity.optPart)
-              particles.add(new Particle(
-                  -1.f + k / 3.f / WIDTH * 2,
-                  1.f - (i + l / 2.f) / HEIGHT * 2,
-                  0.3f + 0.7f * random.nextFloat(),
-                  // 0.9f, 0.02f, 0.0f,
-                  1.f - random.nextFloat() * 0.1f,
-                  1.f - random.nextFloat() * 0.4f,
-                  1.f - random.nextFloat() * 0.5f,
-                  (k % 3) * 3 + l));
             if(activity.optGore)
               particles.add(new Particle(
+                  this,
                   -1.f + k / 3.f / WIDTH * 2,
-                  1.f - (i + l / 2.f) / HEIGHT * 2,
-                  0.3f + 0.7f * random.nextFloat(),
-                  // 0.9f, 0.02f, 0.0f,
+                  1.f - (i + l / 3.f) / HEIGHT * 2,
+                  0.3f + 0.9f * random.nextFloat(),
                   0.9f - random.nextFloat() * 0.2f, 0.3f * random.nextFloat(), 0.2f * random.nextFloat(),
                   -1));
+            if(activity.optPart)
+              particles.add(new Particle(
+                  this,
+                  -1.f + k / 3.f / WIDTH * 2,
+                  1.f - (i + l / 3.f) / HEIGHT * 2,
+                  0.3f + 0.9f * random.nextFloat(),
+                  1.f - random.nextFloat() * 0.1f,
+                  1.f - random.nextFloat() * 0.3f,
+                  1.f - random.nextFloat() * 0.3f,
+                  (k % 3) * 3 + l));
           }
         }
       } else board[i + off] = board[i];
@@ -463,24 +505,26 @@ public class Game {
         if(board[i][j] != 0) {
           for(int k=0;k<3;k++) {
             for(int l=0;l<3;l++) {
-              if(activity.optPart)
-                particles.add(new Particle(
-                    -1.f + (j + k / 3.f) / WIDTH * 2,
-                    1.f - (i + l / 2.f) / HEIGHT * 2,
-                    0.3f + 0.7f * random.nextFloat(),
-                    // 0.9f, 0.02f, 0.0f,
-                    1.f - random.nextFloat() * 0.1f,
-                    1.f - random.nextFloat() * 0.4f,
-                    1.f - random.nextFloat() * 0.5f,
-                    k * 3 + l));
               if(activity.optGore)
                 particles.add(new Particle(
+                    this,
                     -1.f + (j + k / 3.f) / WIDTH * 2,
-                    1.f - (i + l / 2.f) / HEIGHT * 2,
-                    0.3f + 0.7f * random.nextFloat(),
-                    // 0.9f, 0.02f, 0.0f,
-                    0.9f - random.nextFloat() * 0.2f, 0.3f * random.nextFloat(), 0.2f * random.nextFloat(),
+                    1.f - (i + l / 3.f) / HEIGHT * 2,
+                    0.4f + 0.8f * random.nextFloat(),
+                    1.f - random.nextFloat() * 0.3f,
+                    0.3f * random.nextFloat(),
+                    0.2f * random.nextFloat(),
                     -1));
+              if(activity.optPart)
+                particles.add(new Particle(
+                    this,
+                    -1.f + (j + k / 3.f) / WIDTH * 2,
+                    1.f - (i + l / 3.f) / HEIGHT * 2,
+                    0.8f + 0.3f * random.nextFloat(),
+                    1.f - random.nextFloat() * 0.1f,
+                    1.f - random.nextFloat() * 0.2f,
+                    1.f - random.nextFloat() * 0.2f,
+                    k * 3 + l));
             }
           }
           board[i][j] = 0;
