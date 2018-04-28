@@ -36,7 +36,11 @@ public class GameActivity extends AppCompatActivity {
   public boolean optHos;
   public boolean optVib;
   public boolean optSta;
+  public boolean optGhost;
   public int optWidth;
+
+  public long startTime = 0;
+  public long duration = 0;
 
   public Handler mHandeler = new Handler() {
     @Override
@@ -47,6 +51,9 @@ public class GameActivity extends AppCompatActivity {
           break;
         case 2:
           stopGame();
+          break;
+        case 3:
+          duration = System.currentTimeMillis() - startTime;
           break;
         case 10:
           Toast.makeText(getApplicationContext(), "Level " + game.level, Toast.LENGTH_LONG);
@@ -67,6 +74,7 @@ public class GameActivity extends AppCompatActivity {
     optHos = pref.getBoolean("hos", true);
     optVib = pref.getBoolean("vibration", true);
     optSta = pref.getBoolean("sta", true);
+    optGhost = pref.getBoolean("ghost", true);
     optWidth = pref.getInt("width", 7);
 
     Intent intent = getIntent();
@@ -124,6 +132,7 @@ public class GameActivity extends AppCompatActivity {
       intent.putExtra("level", game.level);
       intent.putExtra("score", game.score);
       intent.putExtra("lines", game.lines);
+      intent.putExtra("duration", duration);
       stopGame();
       startActivity(intent);
     }
@@ -157,6 +166,7 @@ public class GameActivity extends AppCompatActivity {
     game.startRunning();
     thread.start();
     Log.d("Game", "Start");
+    startTime = System.currentTimeMillis();
   }
 
   public void stopGame() {

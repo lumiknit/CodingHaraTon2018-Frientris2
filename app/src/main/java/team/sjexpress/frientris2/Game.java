@@ -383,7 +383,7 @@ public class Game {
 
   private void hardDrop() {
     int i;
-    for(i=1;i<HEIGHT;i++) {
+    for(i=1;i<=HEIGHT+3;i++) {
       if(isCollided(type, x, y + i, angle)) break;
     }
     if(i < HEIGHT) {
@@ -461,6 +461,21 @@ public class Game {
       for(int j=0;j<4;j++) {
         if(inBoard(x + j, y + i) && b[i * 4 + j] == 1) {
           board[y + i][x + j] = -1;
+        }
+      }
+    }
+
+    if(activity.optGhost) {
+      int k;
+      for (k = 1; k <= HEIGHT + 3; k++) {
+        if (isCollided(type, x, y + k, angle)) break;
+      }
+      k--;
+      for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+          if (inBoard(x + j, y + k + i) && b[i * 4 + j] == 1 && board[y + k + i][x + j] == 0) {
+            board[y + k + i][x + j] = -2;
+          }
         }
       }
     }
@@ -554,6 +569,8 @@ public class Game {
 
   public void gameOver() {
     gameOverFlag = System.currentTimeMillis();
+    Message msg = activity.mHandeler.obtainMessage(3);
+    activity.mHandeler.sendMessage(msg);
     for(int i=0;i<HEIGHT;i++) {
       for (int j = 0; j < WIDTH; j++) {
         if(board[i][j] != 0) {

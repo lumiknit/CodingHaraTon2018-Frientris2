@@ -16,8 +16,11 @@ public class ResultActivity extends AppCompatActivity {
     int level = intent.getIntExtra("level", 0);
     int score = intent.getIntExtra("score", 0);
     int lines = intent.getIntExtra("lines", 0);
+    long d = intent.getLongExtra("duration", 0L);
     ((TextView)findViewById(R.id.textViewLevel)).setText("Level " + level);
     ((TextView)findViewById(R.id.textViewScore)).setText("Score " + score);
     ((TextView)findViewById(R.id.textViewLines)).setText("Lines " + lines);
+    ((TextView)findViewById(R.id.textViewDuration)).setText("Time " + (d / 1000 / 60) + ":" + (d / 1000 % 60));
+    ((TextView)findViewById(R.id.textViewLinesPerMin)).setText("Lines/Minute " + (lines / ((float)d / 1000 / 60)));
   }
 }

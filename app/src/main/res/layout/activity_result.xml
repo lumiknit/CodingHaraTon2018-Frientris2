@@ -34,4 +34,18 @@
         android:layout_height="wrap_content"
         android:textSize="22dp"
         android:text="" />
+
+    <TextView
+        android:id="@+id/textViewDuration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="22dp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/textViewLinesPerMin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="22dp"
+        android:text="" />
 </LinearLayout>
