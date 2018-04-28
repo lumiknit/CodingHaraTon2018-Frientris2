@@ -13,7 +13,11 @@ public class ResultActivity extends AppCompatActivity {
     setContentView(R.layout.activity_result);
 
     Intent intent = getIntent();
+    int level = intent.getIntExtra("level", 0);
     int score = intent.getIntExtra("score", 0);
-    ((TextView)findViewById(R.id.textViewScore)).setText("" + score);
+    int lines = intent.getIntExtra("lines", 0);
+    ((TextView)findViewById(R.id.textViewLevel)).setText("Level " + level);
+    ((TextView)findViewById(R.id.textViewScore)).setText("Score " + score);
+    ((TextView)findViewById(R.id.textViewLines)).setText("Lines " + lines);
   }
 }

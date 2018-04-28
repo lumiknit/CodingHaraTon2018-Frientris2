@@ -1,5 +1,6 @@
 package team.sjexpress.frientris2;
 
+import android.os.Message;
 import android.os.VibrationEffect;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -83,8 +84,10 @@ public class Game {
 
   /* Current State */
   public int[][] board;
-  public int level;
+  public int level, l = 60;
   public int score;
+  public int lines;
+  public int combo = 0;
   /* Current Block */
   public int type;
   public int x, y;
@@ -141,7 +144,7 @@ public class Game {
           }
         } else {
           dropTick++;
-          if (dropTick > fpsLimit ||
+          if (dropTick > l ||
               (dropTick > 10 && touchType == 3) ||
               (secondDown >= 0 && dropTick > 3 && touchType == 3)) {
             stepBlock();
@@ -261,6 +264,7 @@ public class Game {
     clearBoard();
     level = 0;
     score = 0;
+    lines = 0;
     type = 0;
     x = 0;
     y = 0;
@@ -438,6 +442,8 @@ public class Game {
         }
       }
     }
+    if(delLines.size() > 0) combo++;
+    else combo = 0;
   }
 
   private boolean inBoard(int x, int y) {
@@ -464,7 +470,6 @@ public class Game {
     int off = 0;
     for(int i=HEIGHT - 1;i>=0;i--) {
       if(delLines.indexOf(i) >= 0) {
-        score += WIDTH;
         off++;
         for(int k=0;k<3 * WIDTH;k++) {
           for(int l=0;l<3;l++) {
@@ -489,6 +494,55 @@ public class Game {
           }
         }
       } else board[i + off] = board[i];
+    }
+    lines += off;
+    switch(off) {
+      case 1: score += 1; break;
+      case 2: score += 2; break;
+      case 3: score += 4; break;
+      case 4: score += 10; break;
+    }
+    if(combo >= 30) score += 5;
+    else if(combo >= 20) score += 4;
+    else if(combo >= 10) score += 3;
+    else if(combo >= 5) score += 2;
+    else if(combo >= 2) score += 1;
+    while(score / 4 > level) {
+      level++;
+      switch(level) {
+        case 1: l = 55; break;
+        case 3: l = 50; break;
+        case 5: l = 45; break;
+        case 7: l = 40; break;
+        case 10: l = 35; break;
+        case 12: l = 33; break;
+        case 14: l = 31; break;
+        case 16: l = 29; break;
+        case 18: l = 27; break;
+        case 20: l = 25; break;
+        case 23: l = 23; break;
+        case 27: l = 21; break;
+        case 30: l = 18; break;
+        case 31: l = 17; break;
+        case 32: l = 16; break;
+        case 33: l = 15; break;
+        case 34: l = 14; break;
+        case 35: l = 13; break;
+        case 36: l = 12; break;
+        case 37: l = 11; break;
+        case 38: l = 10; break;
+        case 39: l = 9; break;
+        case 40: l = 8; break;
+        case 50: l = 7; break;
+        case 60: l = 6; break;
+        case 70: l = 5; break;
+        case 80: l = 4; break;
+        case 90: l = 3; break;
+        case 100: l = 2; break;
+        case 120: l = 1; break;
+      }
+      Message msg = activity.mHandeler.obtainMessage(10);
+      activity.mHandeler.sendMessage(msg);
     }
     for(int i=0;i<off;i++) {
       board[i] = new int[WIDTH];

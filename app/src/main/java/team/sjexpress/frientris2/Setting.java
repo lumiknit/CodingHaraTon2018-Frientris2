@@ -15,9 +15,9 @@ public class Setting extends AppCompatActivity {
     SharedPreferences pref;
     SharedPreferences.Editor editor;
 
-    private CheckBox Gore, Particle, HOS, Vibration, ShowArea;
+    private CheckBox Gore, Particle, HOS, Vibration, ShowArea, LevelSpeed;
     private EditText Width;
-    private boolean gore, part, hos, vib, sta;
+    private boolean gore, part, hos, vib, sta, ldds;
     private int width;
 
     @Override
@@ -32,6 +32,7 @@ public class Setting extends AppCompatActivity {
         hos = pref.getBoolean("hos", true);
         vib = pref.getBoolean("vibration", true);
         sta = pref.getBoolean("sta", false);
+        ldds = pref.getBoolean("ldds", true);
         width = pref.getInt("width", 7);
 
         Gore = (CheckBox)findViewById(R.id.checkBox1);
@@ -39,6 +40,7 @@ public class Setting extends AppCompatActivity {
         HOS = (CheckBox)findViewById(R.id.checkBox3);
         Vibration = (CheckBox)findViewById(R.id.checkBox4);
         ShowArea = (CheckBox)findViewById(R.id.checkBox5);
+        LevelSpeed = (CheckBox)findViewById(R.id.checkBox6);
         Width = (EditText)findViewById(R.id.editText1);
 
         Gore.setChecked(gore);
@@ -46,6 +48,7 @@ public class Setting extends AppCompatActivity {
         HOS.setChecked(hos);
         Vibration.setChecked(vib);
         ShowArea.setChecked(sta);
+        LevelSpeed.setChecked(ldds);
         Width.setText("" + width);
 
         Button button = (Button)findViewById(R.id.btn_back);
@@ -67,6 +70,7 @@ public class Setting extends AppCompatActivity {
         editor.putBoolean("hos", HOS.isChecked());
         editor.putBoolean("vibration", Vibration.isChecked());
         editor.putBoolean("sta", ShowArea.isChecked());
+        editor.putBoolean("ldds", LevelSpeed.isChecked());
         int n;
         try {
             n = Integer.parseInt(Width.getText().toString());

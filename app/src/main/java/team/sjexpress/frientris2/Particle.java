@@ -29,7 +29,7 @@ public class Particle {
     if(game.gameOverFlag >= 0) {
       this.vx = ((float) Math.random() * 2 - 1.f) * 0.001f;
       this.vy = ((float) Math.random() * 2 - 1.f) * 0.0005f;
-      this.life = -240 + (int)(Math.random() * 180);
+      this.life = -240 + (int)(Math.random() * 240);
     } else {
       this.vx = ((float) Math.random() * 2 - 1.f) * 0.07f;
       this.vy = ((float) Math.random() * 2 - 1.f) * 0.04f;

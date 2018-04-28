@@ -38,7 +38,7 @@ public class GameActivity extends AppCompatActivity {
   public boolean optSta;
   public int optWidth;
 
-  private Handler mHandeler = new Handler() {
+  public Handler mHandeler = new Handler() {
     @Override
     public void handleMessage(Message msg) {
       switch(msg.what) {
@@ -48,6 +48,9 @@ public class GameActivity extends AppCompatActivity {
         case 2:
           stopGame();
           break;
+        case 10:
+          Toast.makeText(getApplicationContext(), "Level " + game.level, Toast.LENGTH_LONG);
+          break;
       }
     }
   };
@@ -55,14 +58,6 @@ public class GameActivity extends AppCompatActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
-    getWindow().getDecorView().setSystemUiVisibility(
-        View.SYSTEM_UI_FLAG_IMMERSIVE
-            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            | View.SYSTEM_UI_FLAG_FULLSCREEN);
 
     vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -111,6 +106,13 @@ public class GameActivity extends AppCompatActivity {
   @Override
   protected void onResume() {
     super.onResume();
+    getWindow().getDecorView().setSystemUiVisibility(
+        View.SYSTEM_UI_FLAG_IMMERSIVE
+            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_FULLSCREEN);
   }
 
   @Override
@@ -119,7 +121,9 @@ public class GameActivity extends AppCompatActivity {
         game.gameOverFlag >= 0 &&
         System.currentTimeMillis() - game.gameOverFlag > 8000) {
       Intent intent = new Intent(getApplicationContext(), ResultActivity.class);
+      intent.putExtra("level", game.level);
       intent.putExtra("score", game.score);
+      intent.putExtra("lines", game.lines);
       stopGame();
       startActivity(intent);
     }
