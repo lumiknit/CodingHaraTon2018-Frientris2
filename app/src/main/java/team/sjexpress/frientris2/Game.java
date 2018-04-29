@@ -247,6 +247,8 @@ public class Game {
         touchType = 0;
         firstDown = -1;
         secondDown = -1;
+        Message msg = activity.mHandeler.obtainMessage(21);
+        activity.mHandeler.sendMessage(msg);
       }
     }
     return true;

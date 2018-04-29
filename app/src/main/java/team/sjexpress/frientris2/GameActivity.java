@@ -29,7 +29,7 @@ public class GameActivity extends AppCompatActivity {
   public SurfaceView surfaceView;
   public Game game;
 
-  public MediaPlayer bgm, se, splat;
+  public MediaPlayer bgm, se, splat, slam;
 
   public Bitmap[] faces;
 
@@ -70,6 +70,11 @@ public class GameActivity extends AppCompatActivity {
             splat.start();
           }
           break;
+        case 21:
+          if(optSe) {
+            // slam.start();
+          }
+          break;
       }
     }
   };
@@ -90,6 +95,10 @@ public class GameActivity extends AppCompatActivity {
     splat = MediaPlayer.create(getApplicationContext(), R.raw.splat);
     splat.setVolume(1.f, 1.f);
     splat.setLooping(false);
+
+    slam = MediaPlayer.create(getApplicationContext(), R.raw.slam);
+    slam.setVolume(0.9f, 0.9f);
+    slam.setLooping(false);
 
     SharedPreferences pref = getSharedPreferences("setting", MODE_PRIVATE);
     optGore = pref.getBoolean("gore", true);
