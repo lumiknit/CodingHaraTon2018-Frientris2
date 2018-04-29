@@ -83,12 +83,13 @@ public class Game {
   public Semaphore semaParticle;
 
   /* Current State */
-  public int[][] board;
+  public GameBlock[][] board;
   public int level, l = 60;
   public int score;
   public int lines;
   public int combo = 0;
   /* Current Block */
+  public int face;
   public int type;
   public int x, y;
   public int angle, rAngle;
@@ -157,11 +158,11 @@ public class Game {
           if(touchType == 1) {
             moveLeft();
             if(activity.optVib) activity.vibrator.vibrate(20);
-            xShake = -0.05f;
+            xShake = -0.04f;
           } else if(touchType == 2) {
             moveRight();
             if(activity.optVib) activity.vibrator.vibrate(20);
-            xShake = 0.05f;
+            xShake = 0.04f;
           }
           if(firstDown >= 0) {
             firstDown = -1;
@@ -280,12 +281,13 @@ public class Game {
   }
 
   private void clearBoard() {
-    board = new int[HEIGHT][];
+    board = new GameBlock[HEIGHT][];
     for(int i=0;i<HEIGHT;i++) {
-      board[i] = new int[WIDTH];
+      GameBlock[] l = new GameBlock[WIDTH];
       for(int j=0;j<WIDTH;j++) {
-        board[i][j] = 0;
+        l[j] = new GameBlock();
       }
+      board[i] = l;
     }
   }
 
@@ -293,6 +295,7 @@ public class Game {
     type = typeRandom.nextInt(7);
     x = WIDTH / 2 - 1;
     y = -3;
+    face = random.nextInt(activity.faces.length);
     angle = 0;
     rAngle = typeRandom.nextInt(4);
   }
@@ -404,7 +407,7 @@ public class Game {
       for(int j=0;j<4;j++) {
         if(b[i * 4 + j] == 1) {
           if(y + i >= 0 &&
-              (!inBoard(x + j, y + i) || board[y + i][x + j] > 0))
+              (!inBoard(x + j, y + i) || board[y + i][x + j].isFixed()))
             return true;
           else if(x + j < 0 || x + j >= WIDTH) return true;
         }
@@ -422,7 +425,7 @@ public class Game {
       for(int j=0;j<4;j++) {
         if(b[i * 4 + j] > 0) {
           if(y + i >= 0) {
-            board[y + i][x + j] = 1 + rAngle;
+            board[y + i][x + j].setFixed(rAngle, face);
           } else {
             go = true;
           }
@@ -434,7 +437,7 @@ public class Game {
       for (int i = 0; i < HEIGHT; i++) {
         boolean f = true;
         for (int j = 0; j < WIDTH; j++) {
-          if (board[i][j] == 0) f = false;
+          if (board[i][j].isEmpty()) f = false;
         }
         if (f) {
           delLines.add(i);
@@ -453,14 +456,14 @@ public class Game {
   private void updateBoard() {
     for(int i=0;i<HEIGHT;i++) {
       for(int j=0;j<WIDTH;j++) {
-        if(board[i][j] < 0) board[i][j] = 0;
+        if(!board[i][j].isFixed()) board[i][j].clear();
       }
     }
     int[] b = getBlockVector(type, angle);
     for(int i=0;i<4;i++) {
       for(int j=0;j<4;j++) {
         if(inBoard(x + j, y + i) && b[i * 4 + j] == 1) {
-          board[y + i][x + j] = -1;
+          board[y + i][x + j].setTemp(rAngle, face);
         }
       }
     }
@@ -473,8 +476,10 @@ public class Game {
       k--;
       for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-          if (inBoard(x + j, y + k + i) && b[i * 4 + j] == 1 && board[y + k + i][x + j] == 0) {
-            board[y + k + i][x + j] = -2;
+          if (inBoard(x + j, y + k + i) &&
+              b[i * 4 + j] == 1 &&
+              board[y + k + i][x + j].isEmpty()) {
+            board[y + k + i][x + j].setGhost();
           }
         }
       }
@@ -495,6 +500,7 @@ public class Game {
                   1.f - (i + l / 3.f) / HEIGHT * 2,
                   0.3f + 0.9f * random.nextFloat(),
                   0.9f - random.nextFloat() * 0.2f, 0.3f * random.nextFloat(), 0.2f * random.nextFloat(),
+                  0,
                   -1));
             if(activity.optPart)
               particles.add(new Particle(
@@ -505,6 +511,7 @@ public class Game {
                   1.f - random.nextFloat() * 0.1f,
                   1.f - random.nextFloat() * 0.3f,
                   1.f - random.nextFloat() * 0.3f,
+                  board[i][k / 3].face,
                   (k % 3) * 3 + l));
           }
         }
@@ -524,45 +531,17 @@ public class Game {
     else if(combo >= 2) score += 1;
     while(score / 4 > level) {
       level++;
-      switch(level) {
-        case 1: l = 55; break;
-        case 3: l = 50; break;
-        case 5: l = 45; break;
-        case 7: l = 40; break;
-        case 10: l = 35; break;
-        case 12: l = 33; break;
-        case 14: l = 31; break;
-        case 16: l = 29; break;
-        case 18: l = 27; break;
-        case 20: l = 25; break;
-        case 23: l = 23; break;
-        case 27: l = 21; break;
-        case 30: l = 18; break;
-        case 31: l = 17; break;
-        case 32: l = 16; break;
-        case 33: l = 15; break;
-        case 34: l = 14; break;
-        case 35: l = 13; break;
-        case 36: l = 12; break;
-        case 37: l = 11; break;
-        case 38: l = 10; break;
-        case 39: l = 9; break;
-        case 40: l = 8; break;
-        case 50: l = 7; break;
-        case 60: l = 6; break;
-        case 70: l = 5; break;
-        case 80: l = 4; break;
-        case 90: l = 3; break;
-        case 100: l = 2; break;
-        case 120: l = 1; break;
-      }
+      if(level < 15) l = 60 - level * 2;
+      else if(level < 30) l = 45 - level;
+      else if(level < 50) l = 30 - level / 2;
+      else l = 3;
       Message msg = activity.mHandeler.obtainMessage(10);
       activity.mHandeler.sendMessage(msg);
     }
     for(int i=0;i<off;i++) {
-      board[i] = new int[WIDTH];
+      board[i] = new GameBlock[WIDTH];
       for(int j=0;j<WIDTH;j++) {
-        board[i][j] = 0;
+        board[i][j] = new GameBlock();
       }
     }
   }
@@ -571,34 +550,47 @@ public class Game {
     gameOverFlag = System.currentTimeMillis();
     Message msg = activity.mHandeler.obtainMessage(3);
     activity.mHandeler.sendMessage(msg);
+    int cnt = 0;
+    int inc = 0;
     for(int i=0;i<HEIGHT;i++) {
-      for (int j = 0; j < WIDTH; j++) {
-        if(board[i][j] != 0) {
-          for(int k=0;k<3;k++) {
-            for(int l=0;l<3;l++) {
-              if(activity.optGore)
-                particles.add(new Particle(
-                    this,
-                    -1.f + (j + k / 3.f) / WIDTH * 2,
-                    1.f - (i + l / 3.f) / HEIGHT * 2,
-                    0.4f + 0.8f * random.nextFloat(),
-                    1.f - random.nextFloat() * 0.3f,
-                    0.3f * random.nextFloat(),
-                    0.2f * random.nextFloat(),
-                    -1));
-              if(activity.optPart)
-                particles.add(new Particle(
-                    this,
-                    -1.f + (j + k / 3.f) / WIDTH * 2,
-                    1.f - (i + l / 3.f) / HEIGHT * 2,
-                    0.8f + 0.3f * random.nextFloat(),
-                    1.f - random.nextFloat() * 0.1f,
-                    1.f - random.nextFloat() * 0.2f,
-                    1.f - random.nextFloat() * 0.2f,
-                    k * 3 + l));
+      for(int j=0;j<WIDTH;j++) {
+        cnt += board[i][j].isBlock() ? 1 : 0;
+      }
+    }
+    if(cnt > 60) inc = 3;
+    else if(cnt > 30) inc = 2;
+    if(activity.optPart || activity.optGore) {
+      for (int i = 0; i < HEIGHT; i++) {
+        for (int j = 0; j < WIDTH; j++) {
+          if (board[i][j].isBlock()) {
+            for (int k = 0; k < 3; k += inc) {
+              for (int l = 0; l < 3; l += inc) {
+                if (activity.optGore)
+                  particles.add(new Particle(
+                      this,
+                      -1.f + (j + k / 3.f) / WIDTH * 2,
+                      1.f - (i + l / 3.f) / HEIGHT * 2,
+                      0.4f + 0.8f * random.nextFloat(),
+                      1.f - random.nextFloat() * 0.3f,
+                      0.3f * random.nextFloat(),
+                      0.2f * random.nextFloat(),
+                      0,
+                      -1));
+                if (activity.optPart)
+                  particles.add(new Particle(
+                      this,
+                      -1.f + (j + k / 3.f) / WIDTH * 2,
+                      1.f - (i + l / 3.f) / HEIGHT * 2,
+                      0.8f + 0.3f * random.nextFloat(),
+                      1.f - random.nextFloat() * 0.1f,
+                      1.f - random.nextFloat() * 0.2f,
+                      1.f - random.nextFloat() * 0.2f,
+                      board[i][j].face,
+                      k * 3 + l));
+              }
             }
+            board[i][j].clear();
           }
-          board[i][j] = 0;
         }
       }
     }

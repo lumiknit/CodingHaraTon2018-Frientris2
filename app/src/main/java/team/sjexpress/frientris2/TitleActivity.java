@@ -26,7 +26,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Random;
 
 public class TitleActivity extends AppCompatActivity {
   public static final int REQUEST_IMAGE_CAPTURE = 532;
@@ -139,7 +142,7 @@ public class TitleActivity extends AppCompatActivity {
               y += (h - w) / 2;
               h = w;
           }
-            rBitmap = Bitmap.createBitmap(mBitmap, x, y, w, h);
+          rBitmap = Bitmap.createBitmap(mBitmap, x, y, w, h);
         }
         else {
           Toast.makeText(getApplicationContext(), "Cannot find any face; RETRY!!", Toast.LENGTH_LONG).show();
@@ -150,6 +153,7 @@ public class TitleActivity extends AppCompatActivity {
       String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
       ContextWrapper cw = new ContextWrapper(getApplicationContext());
       File dir = cw.getDir("imageDir", Context.MODE_PRIVATE);
+
       File path = new File(dir, timeStamp + "_face.png");
       FileOutputStream fos = null;
       try {
@@ -165,9 +169,30 @@ public class TitleActivity extends AppCompatActivity {
         }
       }
 
+      File[] files = dir.listFiles();
+      Arrays.sort(files);
+
+      ArrayList<String> paths = new ArrayList<>();
+
+      if(files.length < 4) {
+        for(File f : files) {
+          paths.add(f.toString());
+        }
+      } else {
+        paths.add(dir.toString() + "/" + timeStamp + "_face.png");
+        Random r = new Random();
+        while(paths.size() < 4) {
+          int n = r.nextInt(files.length - 1);
+          String name = files[n].toString();
+          if(paths.indexOf(name) <= 0) {
+            paths.add(name);
+          }
+        }
+      }
+
       Intent intent = new Intent(TitleActivity.this, GameActivity.class);
       intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-      intent.putExtra("face", timeStamp + "_face.png");
+      intent.putExtra("paths", paths);
       startActivity(intent);
     }
   }

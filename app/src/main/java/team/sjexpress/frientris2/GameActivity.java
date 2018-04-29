@@ -9,6 +9,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -21,13 +22,15 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 public class GameActivity extends AppCompatActivity {
   public SurfaceView surfaceView;
   public Game game;
+  public MediaPlayer mediaPlayer;
 
-  public Bitmap face;
+  public Bitmap[] faces;
 
   public Vibrator vibrator;
 
@@ -37,6 +40,7 @@ public class GameActivity extends AppCompatActivity {
   public boolean optVib;
   public boolean optSta;
   public boolean optGhost;
+  public boolean optSound;
   public int optWidth;
 
   public long startTime = 0;
@@ -67,6 +71,7 @@ public class GameActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
 
     vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+    mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.brandisky);
 
     SharedPreferences pref = getSharedPreferences("setting", MODE_PRIVATE);
     optGore = pref.getBoolean("gore", true);
@@ -75,17 +80,30 @@ public class GameActivity extends AppCompatActivity {
     optVib = pref.getBoolean("vibration", true);
     optSta = pref.getBoolean("sta", true);
     optGhost = pref.getBoolean("ghost", true);
+    optSound = pref.getBoolean("sound", true);
     optWidth = pref.getInt("width", 7);
 
     Intent intent = getIntent();
-    String fileName = intent.getStringExtra("face");
-    ContextWrapper cw = new ContextWrapper(getApplicationContext());
-    File dir = cw.getDir("imageDir", Context.MODE_PRIVATE);
-    File file = new File(dir, fileName);
-    try {
-      face = BitmapFactory.decodeStream(new FileInputStream(file));
-    } catch(Exception e) {
-      e.printStackTrace();
+    ArrayList<String> paths = intent.getStringArrayListExtra("paths");
+    if(paths != null) {
+      faces = new Bitmap[paths.size()];
+      for(int i=0;i<paths.size();i++) {
+        File file = new File(paths.get(i));
+        faces[i] = readBitmap(file);
+      }
+    } else {
+      File file;
+      String fileName = intent.getStringExtra("face");
+      if(fileName == null) {
+        fileName = intent.getStringExtra("path");
+        file = new File(fileName);
+      } else {
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        File dir = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        file = new File(dir, fileName);
+      }
+      faces = new Bitmap[1];
+      faces[0] = readBitmap(file);
     }
 
     initializeOpenGL();
@@ -98,6 +116,19 @@ public class GameActivity extends AppCompatActivity {
 
     Toast.makeText(getApplicationContext(), "Start", Toast.LENGTH_SHORT).show();
     Log.d("Game", "onCreate");
+  }
+
+  private Bitmap readBitmap(File file) {
+    try {
+      Bitmap b = BitmapFactory.decodeStream(new FileInputStream(file));
+      int expectedSize = 1024 / optWidth;
+      int p = 8;
+      while(p * 2 < expectedSize) p *= 2;
+      return Bitmap.createScaledBitmap(b, p, p, true);
+    } catch(Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   @Override
@@ -127,7 +158,7 @@ public class GameActivity extends AppCompatActivity {
   public boolean onTouchEvent(MotionEvent m) {
     if(m.getAction() == MotionEvent.ACTION_DOWN &&
         game.gameOverFlag >= 0 &&
-        System.currentTimeMillis() - game.gameOverFlag > 8000) {
+        System.currentTimeMillis() - game.gameOverFlag > 2000) {
       Intent intent = new Intent(getApplicationContext(), ResultActivity.class);
       intent.putExtra("level", game.level);
       intent.putExtra("score", game.score);
@@ -167,6 +198,7 @@ public class GameActivity extends AppCompatActivity {
     thread.start();
     Log.d("Game", "Start");
     startTime = System.currentTimeMillis();
+    if(optSound) mediaPlayer.start();
   }
 
   public void stopGame() {
@@ -175,5 +207,6 @@ public class GameActivity extends AppCompatActivity {
       game.finalize();
     }
     Log.d("Game", "Stop");
+    if(optSound) mediaPlayer.stop();
   }
 }
