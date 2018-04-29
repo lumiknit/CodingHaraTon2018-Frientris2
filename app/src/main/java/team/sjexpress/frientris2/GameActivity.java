@@ -9,6 +9,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
@@ -27,6 +28,7 @@ import java.util.concurrent.Semaphore;
 public class GameActivity extends AppCompatActivity {
   public SurfaceView surfaceView;
   public Game game;
+  public MediaPlayer mediaPlayer;
 
   public Bitmap[] faces;
 
@@ -38,6 +40,7 @@ public class GameActivity extends AppCompatActivity {
   public boolean optVib;
   public boolean optSta;
   public boolean optGhost;
+  public boolean optSound;
   public int optWidth;
 
   public long startTime = 0;
@@ -68,6 +71,7 @@ public class GameActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
 
     vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+    mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.brandisky);
 
     SharedPreferences pref = getSharedPreferences("setting", MODE_PRIVATE);
     optGore = pref.getBoolean("gore", true);
@@ -76,6 +80,7 @@ public class GameActivity extends AppCompatActivity {
     optVib = pref.getBoolean("vibration", true);
     optSta = pref.getBoolean("sta", true);
     optGhost = pref.getBoolean("ghost", true);
+    optSound = pref.getBoolean("sound", true);
     optWidth = pref.getInt("width", 7);
 
     Intent intent = getIntent();
@@ -193,6 +198,7 @@ public class GameActivity extends AppCompatActivity {
     thread.start();
     Log.d("Game", "Start");
     startTime = System.currentTimeMillis();
+    if(optSound) mediaPlayer.start();
   }
 
   public void stopGame() {
@@ -201,5 +207,6 @@ public class GameActivity extends AppCompatActivity {
       game.finalize();
     }
     Log.d("Game", "Stop");
+    if(optSound) mediaPlayer.stop();
   }
 }
