@@ -86,7 +86,7 @@ public class GameActivity extends AppCompatActivity {
     vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
     bgm = MediaPlayer.create(getApplicationContext(), R.raw.brandisky);
     bgm.setLooping(true);
-    bgm.setVolume(0.9f, 0.9f);
+    bgm.setVolume(1.f, 1.f);
 
     se = MediaPlayer.create(getApplicationContext(), R.raw.se);
     se.setVolume(1.f, 1.f);
