@@ -3,7 +3,6 @@ package team.sjexpress.frientris2;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -45,5 +44,22 @@ public class GalleryActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), mCustomImageAdapter.getItemPath(position), Toast.LENGTH_LONG).show();
             }
         });
+        mGridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                File delTarget = new File(mCustomImageAdapter.getItemPath(position));
+                if(delTarget.delete()) {
+                    Log.i("PhotoDel", "Removed a photo : " + delTarget.getName());
+                    Toast.makeText(getApplicationContext(), mCustomImageAdapter.getItemPath(position) + " has removed", Toast.LENGTH_LONG).show();
+                    mCustomImageAdapter.notifyDataSetChanged();
+                }
+                else {
+                    Log.i("PhotoDel", "Failed to remove : " + delTarget.getName());
+                    Toast.makeText(getApplicationContext(), mCustomImageAdapter.getItemPath(position) + " cannot be removed", Toast.LENGTH_LONG).show();
+                }
+                return true;
+            }
+        });
     }
+
 }

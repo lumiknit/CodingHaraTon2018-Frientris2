@@ -1,7 +1,6 @@
 package team.sjexpress.frientris2;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
@@ -68,4 +67,6 @@ public class CustomImageAdapter extends BaseAdapter {
         imageView.setImageBitmap(mThumbnail);
         return imageView;
     }
+
+
 }
