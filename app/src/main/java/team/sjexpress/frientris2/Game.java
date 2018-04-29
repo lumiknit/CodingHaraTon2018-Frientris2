@@ -442,6 +442,8 @@ public class Game {
         if (f) {
           delLines.add(i);
           delLineFlag = DELL_F_MAX;
+          Message msg = activity.mHandeler.obtainMessage(20);
+          activity.mHandeler.sendMessage(msg);
         }
       }
     }
@@ -488,6 +490,7 @@ public class Game {
 
   private void deleteLines() {
     int off = 0;
+
     for(int i=HEIGHT - 1;i>=0;i--) {
       if(delLines.indexOf(i) >= 0) {
         off++;

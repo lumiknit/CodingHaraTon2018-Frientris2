@@ -15,9 +15,9 @@ public class Setting extends AppCompatActivity {
     SharedPreferences pref;
     SharedPreferences.Editor editor;
 
-    private CheckBox Gore, Particle, HOS, Vibration, ShowArea, LevelSpeed, Ghost, Sound;
+    private CheckBox Gore, Particle, HOS, Vibration, ShowArea, LevelSpeed, Ghost, Bgm, Se;
     private EditText Width;
-    private boolean gore, part, hos, vib, sta, ldds, ghost, sound;
+    private boolean gore, part, hos, vib, sta, ldds, ghost, bgm, se;
     private int width;
 
     @Override
@@ -34,7 +34,8 @@ public class Setting extends AppCompatActivity {
         sta = pref.getBoolean("sta", false);
         ldds = pref.getBoolean("ldds", true);
         ghost = pref.getBoolean("ghost", true);
-        sound = pref.getBoolean("sound", true);
+        bgm = pref.getBoolean("bgm", true);
+        se = pref.getBoolean("se", true);
         width = pref.getInt("width", 7);
 
         Gore = (CheckBox)findViewById(R.id.checkBox1);
@@ -44,7 +45,8 @@ public class Setting extends AppCompatActivity {
         ShowArea = (CheckBox)findViewById(R.id.checkBox5);
         LevelSpeed = (CheckBox)findViewById(R.id.checkBox6);
         Ghost = (CheckBox)findViewById(R.id.checkBox7);
-        Sound = (CheckBox)findViewById(R.id.checkBox8);
+        Bgm = (CheckBox)findViewById(R.id.checkBox8);
+        Se = (CheckBox)findViewById(R.id.checkBox9);
         Width = (EditText)findViewById(R.id.editText1);
 
         Gore.setChecked(gore);
@@ -54,7 +56,8 @@ public class Setting extends AppCompatActivity {
         ShowArea.setChecked(sta);
         LevelSpeed.setChecked(ldds);
         Ghost.setChecked(ghost);
-        Sound.setChecked(sound);
+        Bgm.setChecked(bgm);
+        Se.setChecked(se);
         Width.setText("" + width);
 
         Button button = (Button)findViewById(R.id.btn_back);
@@ -78,7 +81,8 @@ public class Setting extends AppCompatActivity {
         editor.putBoolean("sta", ShowArea.isChecked());
         editor.putBoolean("ldds", LevelSpeed.isChecked());
         editor.putBoolean("ghost", Ghost.isChecked());
-        editor.putBoolean("sound", Sound.isChecked());
+        editor.putBoolean("bgm", Bgm.isChecked());
+        editor.putBoolean("se", Se.isChecked());
         int n;
         try {
             n = Integer.parseInt(Width.getText().toString());

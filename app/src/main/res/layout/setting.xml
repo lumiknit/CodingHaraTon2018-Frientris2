@@ -75,7 +75,15 @@
         android:layout_marginLeft="100dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Sound" />
+        android:text="BGM" />
+
+    <CheckBox
+        android:id="@+id/checkBox9"
+        android:layout_gravity="left"
+        android:layout_marginLeft="100dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SE" />
 
     <EditText
         android:id="@+id/editText1"

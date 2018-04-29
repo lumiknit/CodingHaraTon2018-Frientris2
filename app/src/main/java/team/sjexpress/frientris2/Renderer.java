@@ -89,6 +89,35 @@ public class Renderer implements GLSurfaceView.Renderer {
     gl.glPushMatrix();
     gl.glTranslatef(game.xShake, game.yShake, 0.f);
 
+    /* Grid */
+    if(!goFlag) {
+      gl.glColor4f(0.7f, 0.7f, 0.7f, 1.f);
+
+      gl.glPushMatrix();
+      gl.glScalef(0.96f, 0.98f, 1.f);
+      gl.glTranslatef(0.f, -2.f, 0.f);
+      for(int i=1;i<game.HEIGHT;i++) {
+        gl.glTranslatef(0.f, 4.f / (game.HEIGHT), 0.f);
+        gl.glPushMatrix();
+        gl.glScalef(1.05f, 0.005f, 1.0f);
+        RenderUtil.drawSquare(gl);
+        gl.glPopMatrix();
+      }
+      gl.glPopMatrix();
+
+      gl.glPushMatrix();
+      gl.glScalef(0.96f, 0.98f, 1.f);
+      gl.glTranslatef(-1.f, 0.f, 0.f);
+      for(int i=1;i<game.WIDTH;i++) {
+        gl.glTranslatef(2.f / (game.WIDTH), 0.f, 0.f);
+        gl.glPushMatrix();
+        gl.glScalef(0.005f, 2.1f, 1.0f);
+        RenderUtil.drawSquare(gl);
+        gl.glPopMatrix();
+      }
+      gl.glPopMatrix();
+    }
+
     /* 1 */
     gl.glPushMatrix();
     gl.glColor4f(0.0f, 0.0f, 0.0f, 1.f);
@@ -116,6 +145,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     }
     RenderUtil.drawSquare(gl);
     gl.glPopMatrix();
+
     /* 3 */
     gl.glPushMatrix();
     gl.glColor4f(0.0f, 0.0f, 0.0f, 1.f);
@@ -147,6 +177,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     RenderUtil.drawSquare(gl);
     gl.glPopMatrix();
 
+    /* Blocks */
     gl.glPushMatrix();
     if(goFlag) {
       gl.glRotatef(d / 200.f, 0.f, 0.f, -1.f);

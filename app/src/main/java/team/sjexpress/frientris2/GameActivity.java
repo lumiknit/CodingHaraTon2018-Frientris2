@@ -28,7 +28,8 @@ import java.util.concurrent.Semaphore;
 public class GameActivity extends AppCompatActivity {
   public SurfaceView surfaceView;
   public Game game;
-  public MediaPlayer mediaPlayer;
+
+  public MediaPlayer bgm, se, splat;
 
   public Bitmap[] faces;
 
@@ -40,7 +41,8 @@ public class GameActivity extends AppCompatActivity {
   public boolean optVib;
   public boolean optSta;
   public boolean optGhost;
-  public boolean optSound;
+  public boolean optBgm;
+  public boolean optSe;
   public int optWidth;
 
   public long startTime = 0;
@@ -62,6 +64,12 @@ public class GameActivity extends AppCompatActivity {
         case 10:
           Toast.makeText(getApplicationContext(), "Level " + game.level, Toast.LENGTH_LONG);
           break;
+        case 20:
+          if(optSe) {
+            se.start();
+            splat.start();
+          }
+          break;
       }
     }
   };
@@ -71,7 +79,17 @@ public class GameActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
 
     vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-    mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.brandisky);
+    bgm = MediaPlayer.create(getApplicationContext(), R.raw.brandisky);
+    bgm.setLooping(true);
+    bgm.setVolume(0.9f, 0.9f);
+
+    se = MediaPlayer.create(getApplicationContext(), R.raw.se);
+    se.setVolume(1.f, 1.f);
+    se.setLooping(false);
+
+    splat = MediaPlayer.create(getApplicationContext(), R.raw.splat);
+    splat.setVolume(1.f, 1.f);
+    splat.setLooping(false);
 
     SharedPreferences pref = getSharedPreferences("setting", MODE_PRIVATE);
     optGore = pref.getBoolean("gore", true);
@@ -80,7 +98,8 @@ public class GameActivity extends AppCompatActivity {
     optVib = pref.getBoolean("vibration", true);
     optSta = pref.getBoolean("sta", true);
     optGhost = pref.getBoolean("ghost", true);
-    optSound = pref.getBoolean("sound", true);
+    optBgm = pref.getBoolean("bgm", true);
+    optSe = pref.getBoolean("se", true);
     optWidth = pref.getInt("width", 7);
 
     Intent intent = getIntent();
@@ -198,7 +217,7 @@ public class GameActivity extends AppCompatActivity {
     thread.start();
     Log.d("Game", "Start");
     startTime = System.currentTimeMillis();
-    if(optSound) mediaPlayer.start();
+    if(optBgm) bgm.start();
   }
 
   public void stopGame() {
@@ -207,6 +226,6 @@ public class GameActivity extends AppCompatActivity {
       game.finalize();
     }
     Log.d("Game", "Stop");
-    if(optSound) mediaPlayer.stop();
+    if(optBgm) bgm.stop();
   }
 }
