@@ -2,6 +2,7 @@ package team.sjexpress.frientris2;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +44,9 @@ public class GalleryActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(getApplicationContext(), mCustomImageAdapter.getItemPath(position), Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(GalleryActivity.this, GameActivity.class);
+                intent.putExtra("path", mCustomImageAdapter.getItemPath(position));
+                startActivity(intent);
             }
         });
     }

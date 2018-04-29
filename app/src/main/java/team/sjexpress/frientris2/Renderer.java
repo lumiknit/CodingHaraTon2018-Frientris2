@@ -14,7 +14,8 @@ public class Renderer implements GLSurfaceView.Renderer {
   private Game game;
   private Handler activityHandler;
 
-  private Image hos, sj, face;
+  private Image hos, sj;
+  private Image[] faces;
 
   private int width, height;
   private float screenRatio;
@@ -30,7 +31,11 @@ public class Renderer implements GLSurfaceView.Renderer {
   public void onSurfaceCreated(GL10 gl, EGLConfig config) {
     hos = new Image(gl, game.activity.getApplicationContext(), R.drawable.hos);
     sj = new Image(gl, game.activity.getApplicationContext(), R.drawable.sj);
-    face = new Image(gl, game.activity.face, 1);
+
+    faces = new Image[game.activity.faces.length];
+    for(int i=0;i<faces.length;i++) {
+      faces[i] = new Image(gl, game.activity.faces[i], 1);
+    }
 
     Message msg = activityHandler.obtainMessage(1);
     activityHandler.sendMessage(msg);
@@ -70,11 +75,13 @@ public class Renderer implements GLSurfaceView.Renderer {
     long d = System.currentTimeMillis() - game.gameOverFlag;
     boolean goFlag = game.activity.optHos && game.gameOverFlag >= 0;
 
+    float F = accF(d);
+
     if(goFlag) {
       gl.glPushMatrix();
-      gl.glScalef(1.4f - 0.4f * accF(d), 1.4f - 0.4f * accF(d), 1.f);
+      gl.glScalef(1.4f - 0.4f * F, 1.4f - 0.4f * F, 1.f);
       gl.glColor4f(1.f, 1.f, 1.f, d * 0.0002f);
-      gl.glRotatef(360000.f * accF(d), 0.f, 0.f, 1.f);
+      gl.glRotatef(360000.f * F, 0.f, 0.f, 1.f);
       hos.draw(gl);
       gl.glPopMatrix();
     }
@@ -87,7 +94,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     gl.glColor4f(0.0f, 0.0f, 0.0f, 1.f);
     if(goFlag) {
       gl.glRotatef(d / 20.f, 0.f, 0.f, 1.f);
-      gl.glScalef(accF(d), accF(d), 1.f);
+      gl.glScalef(F, F, 1.f);
     }
     gl.glTranslatef(0.f, 2.f, 0.f);
     gl.glScalef(1.0f, 0.015f, 1.0f);
@@ -99,7 +106,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     gl.glColor4f(0.0f, 0.0f, 0.0f, 1.f);
     if(goFlag) {
       gl.glRotatef(d / 300.f, 0.f, 0.f, 1.f);
-      gl.glScalef(accF(d), accF(d), 1.f);
+      gl.glScalef(F, F, 1.f);
     }
     gl.glTranslatef(0.f, -2.f, 0.f);
     gl.glScalef(1.0f, 0.015f, 1.0f);
@@ -114,12 +121,12 @@ public class Renderer implements GLSurfaceView.Renderer {
     gl.glColor4f(0.0f, 0.0f, 0.0f, 1.f);
     if(goFlag) {
       gl.glRotatef(d / 37.f, 0.f, 0.f, 1.f);
-      gl.glScalef(accF(d), accF(d), 1.f);
+      gl.glScalef(F, F, 1.f);
     }
     gl.glTranslatef(1.f, 0.f, 0.f);
     gl.glScalef(0.015f, 2.f, 1.0f);
     if(goFlag) {
-      gl.glRotatef(d / 0.f, 0.f, 0.f, 1.f);
+      gl.glRotatef(d / 30.f, 0.f, 0.f, 1.f);
     }
     gl.glColor4f(0.f, 0.f, 0.f, 1.f);
     RenderUtil.drawSquare(gl);
@@ -129,12 +136,12 @@ public class Renderer implements GLSurfaceView.Renderer {
     gl.glColor4f(0.0f, 0.0f, 0.0f, 1.f);
     if(goFlag) {
       gl.glRotatef(d / 320.f, 0.f, 0.f, 1.f);
-      gl.glScalef(accF(d), accF(d), 1.f);
+      gl.glScalef(F, F, 1.f);
     }
     gl.glTranslatef(-1.f, 0.f, 0.f);
     gl.glScalef(0.015f, 2.f, 1.0f);
     if(goFlag) {
-      gl.glRotatef(d / 370.f, 0.f, 0.f, 1.f);
+      gl.glRotatef(d, 0.f, 0.f, 1.f);
     }
     gl.glColor4f(0.f, 0.f, 0.f, 1.f);
     RenderUtil.drawSquare(gl);
@@ -143,7 +150,7 @@ public class Renderer implements GLSurfaceView.Renderer {
     gl.glPushMatrix();
     if(goFlag) {
       gl.glRotatef(d / 200.f, 0.f, 0.f, -1.f);
-      gl.glScalef(accF(d), accF(d), 1.f);
+      gl.glScalef(F, F, 1.f);
     }
     gl.glScalef(0.96f, 1.96f, 1.0f);
     gl.glTranslatef(-1.f, -1.f, 0.f);
@@ -162,23 +169,21 @@ public class Renderer implements GLSurfaceView.Renderer {
 
       for(int j=0;j<game.WIDTH;j++) {
         gl.glTranslatef(2.f, 0.f, 0.f);
-        if(game.board[i][j] != 0) {
+        if(game.board[i][j].isGhost()) {
+          gl.glColor4f(0.5f, 0.5f, 0.5f, 1.f);
+          RenderUtil.drawSquare(gl);
+        } else if(game.board[i][j].isBlock()) {
           gl.glPushMatrix();
-          if(game.board[i][j] == -2) {
-            gl.glColor4f(0.5f, 0.5f, 0.5f, 1.f);
-            RenderUtil.drawSquare(gl);
-          } else {
-            gl.glScalef(0.95f, 0.95f, 1.0f);
-            if(game.board[i][j] > 0)
-              gl.glRotatef((game.board[i][j] - 1) * 90.f, 0.f, 0.f, -1.f);
-            else
-              gl.glRotatef(game.rAngle * 90.f, 0.f, 0.f, -1.f);
-            gl.glColor4f(0.f, 0.f, 0.f, 1.f);
-            RenderUtil.drawSquare(gl);
-            gl.glScalef(0.95f, 0.95f, 1.0f);
-            gl.glColor4f(r, g, b, 1.f);
-            face.draw(gl);
-          }
+          gl.glScalef(0.95f, 0.95f, 1.0f);
+          if(game.board[i][j].isFixed())
+            gl.glRotatef(game.board[i][j].angle * 90.f, 0.f, 0.f, -1.f);
+          else
+            gl.glRotatef(game.rAngle * 90.f, 0.f, 0.f, -1.f);
+          gl.glColor4f(0.f, 0.f, 0.f, 1.f);
+          RenderUtil.drawSquare(gl);
+          gl.glScalef(0.95f, 0.95f, 1.0f);
+          gl.glColor4f(r, g, b, 1.f);
+          faces[game.board[i][j].face].draw(gl);
           gl.glPopMatrix();
         }
       }
@@ -199,7 +204,7 @@ public class Renderer implements GLSurfaceView.Renderer {
         gl.glScalef(0.3f / game.WIDTH * p.size, 0.3f / game.HEIGHT * p.size, 1.f);
         gl.glRotatef(p.angle, 0.f, 0.f, 1.f);
         if(p.index < 0)  RenderUtil.drawSquare(gl);
-        else face.draw(gl, p.index);
+        else faces[p.face].draw(gl, p.index);
         gl.glPopMatrix();
       }
       game.semaParticle.release();
@@ -235,7 +240,7 @@ public class Renderer implements GLSurfaceView.Renderer {
   }
 
   public float accF(long d) {
-    float t = d / 1000.f;
+    float t = d / 2000.f;
     return 1.f / (1.f + t * t * t);
   }
 }

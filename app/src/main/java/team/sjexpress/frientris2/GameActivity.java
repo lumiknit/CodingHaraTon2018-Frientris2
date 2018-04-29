@@ -21,13 +21,14 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
 public class GameActivity extends AppCompatActivity {
   public SurfaceView surfaceView;
   public Game game;
 
-  public Bitmap face;
+  public Bitmap[] faces;
 
   public Vibrator vibrator;
 
@@ -78,14 +79,26 @@ public class GameActivity extends AppCompatActivity {
     optWidth = pref.getInt("width", 7);
 
     Intent intent = getIntent();
-    String fileName = intent.getStringExtra("face");
-    ContextWrapper cw = new ContextWrapper(getApplicationContext());
-    File dir = cw.getDir("imageDir", Context.MODE_PRIVATE);
-    File file = new File(dir, fileName);
-    try {
-      face = BitmapFactory.decodeStream(new FileInputStream(file));
-    } catch(Exception e) {
-      e.printStackTrace();
+    ArrayList<String> paths = intent.getStringArrayListExtra("paths");
+    if(paths != null) {
+      faces = new Bitmap[paths.size()];
+      for(int i=0;i<paths.size();i++) {
+        File file = new File(paths.get(i));
+        faces[i] = readBitmap(file);
+      }
+    } else {
+      File file;
+      String fileName = intent.getStringExtra("face");
+      if(fileName == null) {
+        fileName = intent.getStringExtra("path");
+        file = new File(fileName);
+      } else {
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        File dir = cw.getDir("imageDir", Context.MODE_PRIVATE);
+        file = new File(dir, fileName);
+      }
+      faces = new Bitmap[1];
+      faces[0] = readBitmap(file);
     }
 
     initializeOpenGL();
@@ -98,6 +111,19 @@ public class GameActivity extends AppCompatActivity {
 
     Toast.makeText(getApplicationContext(), "Start", Toast.LENGTH_SHORT).show();
     Log.d("Game", "onCreate");
+  }
+
+  private Bitmap readBitmap(File file) {
+    try {
+      Bitmap b = BitmapFactory.decodeStream(new FileInputStream(file));
+      int expectedSize = 1024 / optWidth;
+      int p = 8;
+      while(p * 2 < expectedSize) p *= 2;
+      return Bitmap.createScaledBitmap(b, p, p, true);
+    } catch(Exception e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   @Override
@@ -127,7 +153,7 @@ public class GameActivity extends AppCompatActivity {
   public boolean onTouchEvent(MotionEvent m) {
     if(m.getAction() == MotionEvent.ACTION_DOWN &&
         game.gameOverFlag >= 0 &&
-        System.currentTimeMillis() - game.gameOverFlag > 8000) {
+        System.currentTimeMillis() - game.gameOverFlag > 2000) {
       Intent intent = new Intent(getApplicationContext(), ResultActivity.class);
       intent.putExtra("level", game.level);
       intent.putExtra("score", game.score);

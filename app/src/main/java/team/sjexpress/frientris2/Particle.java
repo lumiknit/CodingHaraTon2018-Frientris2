@@ -11,9 +11,9 @@ public class Particle {
   public float aSpd;
   public float angle;
   public float r, g, b, a;
-  public int index;
+  public int face, index;
 
-  public Particle(Game game, float x, float y, float size, float r, float g, float b, int index) {
+  public Particle(Game game, float x, float y, float size, float r, float g, float b, int face, int index) {
     this.game = game;
     this.life = 0;
     this.lifeCnt = 0;
@@ -36,6 +36,7 @@ public class Particle {
     }
     this.aSpd = (this.vx * this. vx + this.vy * this.vy) * 18000;
     this.ay = -0.0007f;
+    this.face = face;
     this.index = index;
   }
 
